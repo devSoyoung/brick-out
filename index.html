@@ -7,7 +7,7 @@
   <style>
     * {
       padding: 0;
-      margin: 0;
+      margin: 10px;
       text-align: center;
     }
 
@@ -23,8 +23,8 @@
   <h1>My Canvas</h1>
   <canvas id="myCanvas" width="480" height="320"></canvas>
   <script>
-    let canvas = document.getElementById("myCanvas");
-    let ctx = canvas.getContext("2d");
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
 
     let x = canvas.width / 2;
     let y = canvas.height - 30;
@@ -32,7 +32,7 @@
 
     let dx = -2;
     let dy = -2;
-    let ballColor = "#0095DD"
+    let ballColor = "#0095DD";
 
     function drawBall() {
       ctx.beginPath();
@@ -42,33 +42,66 @@
       ctx.closePath();
     }
 
+    let paddle = {
+      height: 10,
+      width: 75,
+    }
+    let paddleX = (canvas.width - paddle.width) / 2;
+
+    function drawPaddle() {
+      ctx.beginPath();
+      ctx.rect(paddleX, canvas.height - paddle.height, paddle.width, paddle.height);
+      ctx.fillStyle = "#0095DD";
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    let rightPressed = false;
+    let leftPressed = false;
+
+    function keyDownHandler(e) {
+      if (e.keyCode == 39) rightPressed = true;
+      else if (e.keyCode == 37) leftPressed = true;
+    }
+
+    function keyUpHandler(e) {
+      if (e.keyCode == 39) rightPressed = false;
+      else if (e.keyCode == 37) leftPressed = false;
+    }
+
     function generateRandom(min, max) {
       let randNum = Math.floor(Math.random() * (max - min + 1)) + min;
       return randNum
     }
 
     function changeBallColor() {
-      let r = generateRandom(0, 255);
-      let g = generateRandom(0, 255);
-      let b = generateRandom(0, 255);
-      ballColor = `rgba(${r}, ${g}, ${b})`;
+      ballColor = `rgba(${generateRandom(0, 255)}, ${generateRandom(0, 255)}, ${generateRandom(0, 255)})`;
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBall();
+      drawPaddle();
       x += dx;
       y += dy;
 
-      if (y + dy < ballRadius || y + dy > canvas.height - ballRadius) { 
+      if (y + dy < ballRadius) {
         dy = -dy;
         changeBallColor();
-      };
-      if (x + dx < ballRadius || x + dx > canvas.width - ballRadius) { 
-        dx = -dx; 
+      }
+      if (x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
+        dx = -dx;
         changeBallColor();
-      };
+      } else if (y + dy > canvas.height - ballRadius) {
+        alert('Game Over!');
+        document.location.reload();
+      }
+
+      if (rightPressed && paddleX < canvas.width - paddle.width) { paddleX += 7; }
+      else if (leftPressed && paddleX > 0) { paddleX -= 7; }
     }
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
     setInterval(draw, 10);
   </script>
 </body>
